@@ -115,11 +115,8 @@ function setup() {
   
   print(blocks);
   for (let b of blocks.blocks) { loadBlock(b); }
-  // TODO: make block cards resize correctly with longer/shorter inputs
-  // TODO: update drawdown awhen block threadings are changed, not just when block sequence is changed
   
   noLoop();
-  // print(elts);
 }
 
 function draw() {

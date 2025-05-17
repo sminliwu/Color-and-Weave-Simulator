@@ -31,6 +31,7 @@ function updateThreadColors() {
   // console.log(thread_colors);
 }
 
+// TODO: transfer these from p5 to jQuery to speed up load time
 function loadSettings() {
   let helperText = createButton('Hide help text');
   helperText.parent("settings-header");
