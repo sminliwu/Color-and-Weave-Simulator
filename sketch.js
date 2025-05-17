@@ -5,18 +5,23 @@ let color_sequence;
 let color_list;
 let seq_input, weft_seq_input;
 
-// loom set-up
 const defaults = {
+  // loom basics
   shafts: 4,
   treadles: 6,
   warps: 90,
-  picks: 40,
+  picks: 90,
   tieUp: [
     [false, true, true, false, false, true],
     [true, true, false, false, true, false],
     [true, false, false, true, false, true],
     [false, false, true, true, true, false],
   ],
+  // drawing parameters
+  xflip: false,
+  yflip: false,
+  dim_cell: 5,
+  // blocks
   blockData: {
     shafts: 4,
     treadles: 6,
@@ -43,30 +48,44 @@ const defaults = {
 };
 
 // pattern data
-let draft;
-let stitches;
-let TX, TL;
-let tieUp, drawdown;
+// let draft;
+// let stitches;
+// let TX, TL;
+// let tieUp, drawdown;
 let thread_colors = { warp: "", weft: "" };
 
 // block drafting
-let blocks;
+// let blocks;
 
-// drawing parameters
-const drawParams = {
-  xflip: false,
-  yflip: false,
-  dim_cell: 5
-}
+// TODO: initialize more things outside of setup() because P5 is slow
 
-var xflip = false;
-var yflip = false;
+const { shafts, treadles, warps, picks } = {...defaults};
+const draft = new Draft(shafts, treadles, warps, picks);
+const blocks = BlockSystem.fromObject(defaults.blockData);
+
+draft.tieupFromArray(defaults.tieUp);
+const { TX, TL, tieUp, drawdown } = { 
+  TX: draft.threading, 
+  TL: draft.treadling, 
+  tieUp: draft.tieup, 
+  drawdown: draft.drawdown
+};
+console.log(draft.tieup, tieUp);
+
+console.log("draft initialized");
 
 const elts = {}; // maintain collection of HTML elements created
 
+document.addEventListener("DOMContentLoaded", (event) => {
+  console.log("DOM fully loaded and parsed");
+});
+window.addEventListener("load", (event) => {
+  console.log("page is fully loaded");
+});
+
 function setup() {
+  console.log("running p5 setup function");
   // initialize all components of the draft
-  blocks = BlockSystem.fromObject(defaults.blockData);
   // print(blocks.compileBlocks());
 
   color_sequence = new ColorSequence();
@@ -76,15 +95,10 @@ function setup() {
 
   color_sequence.seq = "01";
 
-  const { shafts, treadles, warps, picks } = {...defaults};
-  draft = new Draft(shafts, treadles, warps, picks);
-
-  draft.tieupFromArray(defaults.tieUp);
-  
-  tieUp = draft.tieup;
-  TX = draft.threading;
-  TL = draft.treadling;
-  drawdown = draft.drawdown;
+  // tieUp = draft.tieup;
+  // TX = draft.threading;
+  // TL = draft.treadling;
+  // drawdown = draft.drawdown;
 
   TX.blocks = blocks;
   TX.blockSeq = defaults.blockData.block_seq;
@@ -99,7 +113,6 @@ function setup() {
   })
   
   treadleAsWarped();
-
   loadSettings();
   // just load canvas in BG and fullsize (z-index = -1)
   elts.canvas = createCanvas(windowWidth, windowHeight);
@@ -108,15 +121,27 @@ function setup() {
   
   elts.blocks = select('#blocks-container');
   elts.draft = select('#draft-container')
+  // console.log(elts.draft);
   
-  elts.tieup = createDiv();
-  elts.tieup.id("tie-up");
-  elts.tieup.parent(elts.canvas);
+  // elts.tieup = createDiv();
+  // elts.tieup.id("tie-up");
+  // elts.tieup.parent(elts.draft); 
+  // tieUp.setup(elts.tieup, { cell_size: defaults.dim_cell, xflip: true, yflip: false });
+
+  // elts.tx = createDiv();
+  // elts.tx.id("threading");
+  // elts.tx.parent(elts.draft);
+  // TX.setup(elts.tx, { cell_size: defaults.dim_cell, xflip: false, yflip: false });
   
-  print(blocks);
+  // print(blocks);
+  // initialize grid renderers here
   for (let b of blocks.blocks) { loadBlock(b); }
+  blocks.blocks.map((b) => b.render.updatePos());
+  
+  draft.setup(defaults.dim_cell);
   
   noLoop();
+  redraw();
 }
 
 function draw() {
@@ -124,10 +149,12 @@ function draw() {
   updateDrawdown();
   updateThreadColors();
   
-  const dim_cell = drawParams.dim_cell;
+  const dim_cell = defaults.dim_cell;
   stroke(0);
   strokeWeight(0.5);
 
+  let xflip = false;
+  let yflip = false;
   // use the elements stored in elts to position the drawing
   let xsign = xflip ? -1 : 1;
   let ysign = yflip ? -1 : 1;
@@ -141,51 +168,16 @@ function draw() {
   let xo = xflip ? windowWidth : elts.draft.position().x;
   let yo = yflip ? windowHeight : elts.draft.position().y;
 
-  // background(240);
-
-  let warp_xo = xo + xsign * dim_cell * (TL.treadles + 1);
-
   ddxo = xo + xsign * dim_cell * (TL.treadles + 1);
   ddyo = yo + ysign * dim_cell * (TX.shafts + 1);
   // stroke(0);
 
   let dispX, dispY;
 
-  // DRAW THREADING
-  for (var i = 0; i < TX.shafts; i++) {
-    // Y coord (row)
-    for (var j = 0; j < TX.warps; j++) {
-      // X coord (col)
-      if (TX.getData(i, j)) fill(0);
-      else fill(255);
-      dispX = ddxo + xsign * dim_cell * j;
-      dispY = yo + ysign * dim_cell * (TX.shafts - 1 - i);
-      rect(dispX, dispY, dim_cell, dim_cell);
-    }
-  }
-
-  // DRAW TIE UP
-  for (var i = 0; i < TX.shafts; i++) {
-    for (var j = 0; j < TL.treadles; j++) {
-      if (tieUp.getData(i, j)) fill(0);
-      else fill(255);
-      dispX = xo + xsign * dim_cell * (TL.treadles - 1 - j);
-      dispY = yo + ysign * dim_cell * (TX.shafts - 1 - i);
-      rect(dispX, dispY, dim_cell, dim_cell);
-    }
-  }
-
-  // DRAW TREADLING
-  for (var i = 0; i < TL.picks; i++) {
-    //<>//
-    for (var j = 0; j < TL.treadles; j++) {
-      if (TL.getData(i, j)) fill(0);
-      else fill(255);
-      dispX = xo + xsign * dim_cell * (TL.treadles - 1 - j);
-      dispY = ddyo + ysign * dim_cell * i;
-      rect(dispX, dispY, dim_cell, dim_cell);
-    }
-  }
+  TX.draw();
+  tieUp.draw();
+  TL.draw();
+  drawdown.draw();
 
   // DRAWDOWN
   noStroke();

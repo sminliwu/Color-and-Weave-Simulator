@@ -118,10 +118,4 @@ class Threading extends DraftContainer {
     }
     return str; 
   }
-  
-  draw() {
-    if (this.render) {
-      
-    } else { throw Error(); }
-  }
 }

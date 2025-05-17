@@ -1,5 +1,8 @@
-// helper functions for byte handling
-// how many bytes are needed to hold x bits
+/**
+ * FILE: data.js --- helper classes and functions for low-level data handling
+ * classes: ByteArray, DraftContainer, GridRenderer
+ */
+// byte handling: how many bytes are needed to hold x bits
 function numBytes(x) {
   if (x % 8 == 0) {
     return x / 8 + 1;
@@ -27,11 +30,9 @@ class ByteArray {
     let result = new ByteArray(h, w);
     for (var row = 0; row < h; row++) {
       for (var col = 0; col < w; col++) {
-        // console.log(array[row][col]);
         result.setData(row, col, array[row][col]);
       }
     }
-    // console.log(result);
     return result;
   }
 
@@ -193,17 +194,9 @@ class DraftContainer {
     return result;
   }
   
-  clearData() {
-    this.rawData = new ByteArray(this.height, this.width);
-  }
-
-  getData(row, col) {
-    return this.array.getData(row, col);
-  }
-
-  setData(row, col, value) {
-    this.array.setData(row, col, value);
-  }
+  clearData() { this.rawData = new ByteArray(this.height, this.width); }
+  getData(row, col) { return this.array.getData(row, col); }
+  setData(row, col, value) { this.array.setData(row, col, value); }
 
   // resizing methods, update both rawData and profileData
   addRow() {
@@ -245,26 +238,41 @@ class DraftContainer {
     }
     return str;
   }
+
+  setup(elt, drawParams = {cell_size: defaults.dim_cell, xflip: defaults.xflip, yflip: defaults.yflip}) {
+    this.render = new GridRenderer(drawParams.cell_size, elt, this, drawParams.xflip, drawParams.yflip);
+    this.render.updatePos();
+    this.render.resize();
+  }
+
+  draw() { this.render.draw(); }
 }
 
+/**
+ * CLASS: GridRenderer --- helper class that keeps track of HTML + p5 drawing of a grid of squares
+ */
 class GridRenderer {
-  constructor(cell_size, elt) {
-    this.container = elt; // an HTML element covering the area of canvas that the renderer is responsible for
+  constructor(cell_size, elt, obj, xflip=false, yflip=true) {
+    this.container = elt; // a P5 HTML element covering the area of canvas that the renderer is responsible for
+    this.obj = obj; // the grid-based data object to render (DraftContainer or inheriting class)
     
     this.left = -1; // starting x pos on the canvas
     this.top = -1; // starting y pos on the canvas
     this.dim = cell_size; // size of squares in the grid (px)
-    this.xflip = false;
-    this.yflip = true;
+    this.xflip = xflip;
+    this.yflip = yflip;
     
     this.border = true;
     this.colors = {
       false: 255,
       true: 0,
     };
-    
+
     this.updatePos();
   }
+
+  get rows() { return this.obj.height; }
+  get cols() { return this.obj.width; }
 
   get xo() {
     return this.xflip ? this.left + this.container.width - this.dim : this.left;
@@ -280,13 +288,30 @@ class GridRenderer {
     this.top = pos.y;
   }
   
+  resize() {
+    this.container.style('height', this.rows * this.dim + "px");
+    this.container.style('width', this.cols * this.dim + "px");
+  }
+
+  // update position based on the container's position on the page
   updatePos() {
-    print(this);
+    // print(this);
     this.position = this.container.position();
   }
 
+  // forcibly place the container on the page
+  placePos(x, y) {
+    this.container.position(x, y);
+    this.updatePos();
+  }
+
   // optional arg: color mapping?
-  draw(h, w, array) {
+  draw() {
+    const array = this.obj.array;
+    // this.rows = h;
+    // this.cols = w;
+    this.resize();
+
     const dim = this.dim;
     strokeWeight(0.5); 
     if (this.border) { stroke(0); }
@@ -296,9 +321,9 @@ class GridRenderer {
     let ysign = this.yflip ? -1 : 1;
 
     // the grid is h squares tall (i.e. has h rows)
-    for (var i = 0; i < h; i++) {
+    for (var i = 0; i < this.rows; i++) {
       // Y coord (row)
-      for (var j = 0; j < w; j++) {
+      for (var j = 0; j < this.cols; j++) {
         // X coord (col)
         // let h = this.colors[array.getData(i, j)];
         // print(array.getData(i, j));

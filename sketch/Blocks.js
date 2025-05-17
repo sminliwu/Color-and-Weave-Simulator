@@ -30,9 +30,9 @@ class BlockSystem {
   get keys() { return this.blocks.map(b => b.key); }
   
   loadBlockData(params) {
-    let b = new Block(this.length+1, params.name, params.dir, this);
+    let b = new Block(this.length+1, params.name, this);
     b.data = params.data;
-    b.stringToArrayData();
+    // b.stringToArrayData();
     this.blocks.push(b);
   }
   
@@ -59,7 +59,7 @@ class BlockSystem {
 
 class Block extends DraftContainer{
   // a small DraftContainer subtype that contains a threading or treadling sequence that can be repeated as a unit
-  constructor(key, name, dir, sys) {
+  constructor(key, name, sys) {
     super(sys.shafts, 0);
     this.key = key;  
     this.name = name;
@@ -77,8 +77,18 @@ class Block extends DraftContainer{
   stringToArrayData() {
     // print(this.data);
     // resize array if needed
-    let dim = (this.dir == WARP_DIRECTION) ? "width" : "height";
+    let { dim, otherDim, draftProp } = (this.dir == WARP_DIRECTION) ? {
+      dim: "width",
+      otherDim: "height",
+      draftProp: "shafts",
+    } : {
+      dim: "height",
+      otherDim: "width",
+      draftProp: "treadles",
+    }
+    // let otherDim = (this.dir == WARP_DIRECTION) ? "height" : "width";
     this[dim] = this.data.length;
+    this[otherDim] = this.sys[draftProp];
     this.clearData();
     
     for (let char in this.data) {

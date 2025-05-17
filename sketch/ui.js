@@ -53,7 +53,7 @@ function loadSettings() {
   warps.class("num-input");
   warps.input(() => {
     let num = parseInt(warps.value());
-    if (num > 50) setWarps(num);
+    if (num > 2) setWarps(num);
   });
   
   let wefts = createInput(TL.picks.toString());
@@ -62,7 +62,7 @@ function loadSettings() {
   wefts.class("num-input");
   wefts.input(() => {
     let num = parseInt(wefts.value());
-    if (num > 20) setWefts(num);
+    if (num > 2) setWefts(num);
   });
   
   let threadMenu = createSelect();
@@ -160,15 +160,17 @@ function toggleColorMatch() {
   }
 }
 
-function updateBlockRenderPos() {
-  
-}
-
+/**
+ * For the Block b: initialize its GridRenderer, udpate P5 and DOM elements, set up events
+ * BEFORE CALLING: HTML elements loaded, default data loaded to a BlockSystem object
+ * @param {Block} b the Block object to load to DOM/P5
+ */
 function loadBlock(b) {
   print(b);
   const container = elts.blocks;
-  const grid = drawParams.dim_cell*2;
+  const grid = defaults.dim_cell*2;
   
+  // make a new div for the GridRenderer
   let block = createDiv();
   block.id('block-'+b.key+'-grid');
   block.style('height', b.sys.shafts * grid + "px");
@@ -177,14 +179,19 @@ function loadBlock(b) {
     print("user clicked", mouseX, mouseY, "relative", block.position());
   });
   
+  b.render = new GridRenderer(grid, block, b);
+  
+  // make the rest of the card contents
   let h = createElement('p', b.name);
   let blockInput = createInput(b.data);
   blockInput.id('block-'+b.key+'-input');
   
+  // make the card iteself
   let card = createDiv();
   card.id('block-'+b.key);
   card.class('flex-column card');
   
+  // place elements
   card.parent(container);
   h.parent(card);
   block.parent(card);
@@ -192,9 +199,8 @@ function loadBlock(b) {
   
   blockInput.style('width', b.data.length*0.7+"em");
   
-  let gridPos = block.position();
+  // let gridPos = block.position();
   // print(block.position());
-  b.render = new GridRenderer(grid, block);
   // b.render.position = block.position();
   // print(b.render);
   
@@ -206,7 +212,7 @@ function loadBlock(b) {
     TX.updateThreading();
     treadleAsWarped();
     
-    block.style('width', b.data.length * grid + "px");
+    // block.style('width', b.data.length * grid + "px");
     blockInput.style('width', b.data.length*0.7+"em");
     blocks.blocks.map((b) => b.render.updatePos());
     redraw();

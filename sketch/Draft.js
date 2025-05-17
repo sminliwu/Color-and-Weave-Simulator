@@ -12,7 +12,7 @@ class Draft {
     this.tieup = new DraftContainer(shafts, treadles);
     this.drawdown = new DraftContainer(picks, warps);
 
-    this.sections = [this.threading, this.tieup, this.treadling, this.drawdown];
+    // this.sections = [this.threading, this.tieup, this.treadling, this.drawdown];
   }
 
   get s() { return this.shafts; }
@@ -25,6 +25,42 @@ class Draft {
   set t(n) {
     this.treadles = n;
     this.tieup.width = n;
+  }
+
+  setup(dim=defaults.dim_cell) {
+    // const container = elts.draft; // only run this after the P5 Element created
+
+    elts.tieup = createDiv();
+    elts.tieup.id("tie-up");
+    elts.tx = createDiv();
+    elts.tx.id("threading");
+    elts.tl = createDiv();
+    elts.tl.id("treadling");
+    elts.dd = createDiv();
+    elts.dd.id("drawdown");
+
+    for (let el of [elts.tieup, elts.tx, elts.tl, elts.dd]) {
+      el.parent(elts.draft); 
+      // console.log(elts.draft.position());
+    }
+
+    const pos = elts.draft.position();
+    const { xo, yo } = { xo: pos.x, yo: pos.y };
+    const ddxo = xo + (this.treadles+1)*dim;
+    const ddyo = yo + (this.shafts+1)*dim;
+
+    console.log("positions", xo, yo, ddxo, ddyo);
+    
+    this.tieup.setup(elts.tieup, { cell_size: dim, xflip: true, yflip: true });
+    this.threading.setup(elts.tx, { cell_size: dim, xflip: false, yflip: true});
+    this.treadling.setup(elts.tl, { cell_size: dim, xflip: true, yflip: false });
+    this.drawdown.setup(elts.dd, { cell_size: dim, xflip: false, yflip: false});
+
+    this.tieup.render.placePos(xo, yo);
+    this.threading.render.placePos(ddxo, yo);
+    this.treadling.render.placePos(xo, ddyo);
+    this.drawdown.render.placePos(ddxo, ddyo);
+
   }
 
   tieupFromArray(array) {
