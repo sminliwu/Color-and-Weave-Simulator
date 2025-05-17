@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/addons/p5.sound.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+  </head>
+  
+  <body id="page">
+    <main id="main" class="flex-column page-flex-column">
+      <h1>Color and Weave Simulator</h1>
+      <div id="blocks" class="text-entry">
+        <div id="blocks=header" class="flex-row">
+          <h2 id="sequence-label" class="text-field-label">Blocks</h2>
+        </div>
+        <p class="help-text">Blocks used to create the larger draft. By default, the same blocks are used in threading and treadling.</p>
+      </div>
+      <div id="blocks-container" class="flex-row"></div>
+      <div id="block-sequence">
+        <h3 class="text-field-label">Block Sequence</h3>
+        <p class="help-text">Using the symbols for each block, type the sequence of blocks you want in the draft.</p>
+      </div>
+      <h2>Resulting Draft</h2>
+      <div id="draft-container"></div>
+    </main>
+
+    <div id="sidebar" class="flex-column page-flex-column">
+      <div id="colors">
+        <h2>Colors</h2>
+        <p class="help-text">The yarn colors used in the design. The left text field displays the character code assigned to the yarn. Colors are randomly generated. Click on the right button to change the color. </p>
+        <table id="colors-list"></table>
+      </div>
+      <div id="color-settings">
+      </div>
+
+      <div id="settings">
+        <div id="settings-header">
+          <h2>Settings</h2>
+        </div>
+        <p class="help-text"> Change the structure and dimensions of the cloth.
+        </p>
+
+        <div id="dimensions" class="flex-row">
+          <span id="num-warps"></span> warps x
+          <span id="num-wefts"></span> wefts
+        </div>
+
+        <div id="thread-menu" class="setting">
+          <h3>Threading</h3>
+          <p class="help-text"> Change the draft used for warping.
+          </p>
+        </div>
+        <div id="treadle-as" class="setting">
+          <p class="help-text">"Tromp as writ" -- if checked, treadling will match threading.</p>
+        </div>
+        <div id="treadle-menu" class="setting">
+          <h3>Treadling</h3>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.1.slim.min.js"></script>
+    <script src="sketch/data.js"></script>
+    <script src="sketch/Threading.js"></script>
+    <script src="sketch/Treadling.js"></script>
+    <script src="sketch/Draft.js"></script>
+    <script src="sketch/ColorSequence.js"></script>
+    <script src="sketch/Blocks.js"></script>
+    <script src="sketch/ui.js"></script>
+    <script src="sketch.js"></script>
+    
+    <map name="p5-overlay"></map>
+    <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" style="z-index:-1; display:none" alt="blank image to overlay the canvas" usemap="p5-overlay">
+  </body>
+</html>

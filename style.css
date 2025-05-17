@@ -1,0 +1,96 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: none;
+}
+
+canvas {
+  display: block;
+  position: absolute;
+  z-index: -1;
+  top: 0;
+}
+
+main {
+  width: 100%;
+  height: -webkit-fill-available;
+  overflow-y: none;
+}
+
+#main-column {
+  min-width: 500px;
+  overflow-y: scroll;
+}
+
+.help-text {
+  font-size: 10pt;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+p {
+  margin: 0px;
+}
+
+#sidebar {
+  width: max-content;
+  max-width: 30%;
+  height: 100%;
+  border-right: solid 0.5pt;
+  overflow-y: scroll;
+}
+
+.num-input {
+  width: 2em;
+}
+
+.symbol-input {
+  width: 1.5em;
+}
+
+.card {
+  padding: 5px;
+  border: solid 0.5pt;
+}
+
+.card > input {
+  width: max-content;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.page-flex-column {
+  float: left;
+  padding: 0 1em;
+  height: 100%;
+}
+
+button {
+  width: fit-content;
+  margin-bottom: 0.5em;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  width: max-content;
+  align-items: baseline;
+}
+
+.flex-row > div, .flex-row > h2 {
+  margin: 0em;
+  margin-right: 1em;
+}
+
+.setting {
+  margin-bottom: 1.5em;
+}
