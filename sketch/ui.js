@@ -65,36 +65,36 @@ function loadSettings() {
     if (num > 2) setWefts(num);
   });
   
-  let threadMenu = createSelect();
-  threadMenu.parent("thread-menu");
-  threadMenu.option("Straight draw");
-  threadMenu.option("Point draw");
-  threadMenu.option("Advancing point");
-  threadMenu.changed(() => {
-    updateDraft();
-    if (treadleAs.checked()) { 
-      treadleMenu.value(threadMenu.value());
-      updateDraft(false); }
-  });
+  // let threadMenu = createSelect();
+  // threadMenu.parent("thread-menu");
+  // threadMenu.option("Straight draw");
+  // threadMenu.option("Point draw");
+  // threadMenu.option("Advancing point");
+  // threadMenu.changed(() => {
+  //   updateDraft();
+  //   if (treadleAs.checked()) { 
+  //     treadleMenu.value(threadMenu.value());
+  //     updateDraft(false); }
+  // });
   
-  let treadleAs = createCheckbox("Tromp as writ", true);
-  treadleAs.parent("treadle-as");
+  // let treadleAs = createCheckbox("Tromp as writ", true);
+  // treadleAs.parent("treadle-as");
   
-  let treadleMenu = createSelect();
-  treadleMenu.parent("treadle-menu");
-  treadleMenu.option("Straight draw");
-  treadleMenu.option("Point draw");
-  treadleMenu.option("Advancing point");
-  treadleMenu.changed(() => updateDraft(false));
+  // let treadleMenu = createSelect();
+  // treadleMenu.parent("treadle-menu");
+  // treadleMenu.option("Straight draw");
+  // treadleMenu.option("Point draw");
+  // treadleMenu.option("Advancing point");
+  // treadleMenu.changed(() => updateDraft(false));
   
-  treadleAs.changed(() => {
-    if (treadleAs.checked()) {
-      $('#treadle-menu').hide();
-    } else { $('#treadle-menu').show(); }
-  });
+  // treadleAs.changed(() => {
+  //   if (treadleAs.checked()) {
+  //     $('#treadle-menu').hide();
+  //   } else { $('#treadle-menu').show(); }
+  // });
   
-  $('#treadle-menu').hide();
-  $('.weft').hide();
+  // $('#treadle-menu').hide();
+  // $('.weft').hide();
 }
 
 function updateDraft(tr=true) {
@@ -168,7 +168,7 @@ function toggleColorMatch() {
 function loadBlock(b) {
   print(b);
   const container = elts.blocks;
-  const grid = defaults.dim_cell*2;
+  const grid = defaults.dim_cell;
   
   // make a new div for the GridRenderer
   let block = createDiv();

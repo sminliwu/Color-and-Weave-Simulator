@@ -47,15 +47,9 @@ const defaults = {
   },
 };
 
-// pattern data
-// let draft;
-// let stitches;
-// let TX, TL;
-// let tieUp, drawdown;
 let thread_colors = { warp: "", weft: "" };
 
 // block drafting
-// let blocks;
 
 // TODO: initialize more things outside of setup() because P5 is slow
 
@@ -63,7 +57,8 @@ const { shafts, treadles, warps, picks } = {...defaults};
 const draft = new Draft(shafts, treadles, warps, picks);
 const blocks = BlockSystem.fromObject(defaults.blockData);
 
-draft.tieupFromArray(defaults.tieUp);
+// draft.tieupFromArray(defaults.tieUp);
+draft.twillTieUp(4, 2);
 const { TX, TL, tieUp, drawdown } = { 
   TX: draft.threading, 
   TL: draft.treadling, 
@@ -76,12 +71,12 @@ console.log("draft initialized");
 
 const elts = {}; // maintain collection of HTML elements created
 
-document.addEventListener("DOMContentLoaded", (event) => {
-  console.log("DOM fully loaded and parsed");
-});
-window.addEventListener("load", (event) => {
-  console.log("page is fully loaded");
-});
+// document.addEventListener("DOMContentLoaded", (event) => {
+//   console.log("DOM fully loaded and parsed");
+// });
+// window.addEventListener("load", (event) => {
+//   console.log("page is fully loaded");
+// });
 
 function setup() {
   console.log("running p5 setup function");
@@ -95,11 +90,6 @@ function setup() {
 
   color_sequence.seq = "01";
 
-  // tieUp = draft.tieup;
-  // TX = draft.threading;
-  // TL = draft.treadling;
-  // drawdown = draft.drawdown;
-
   TX.blocks = blocks;
   TX.blockSeq = defaults.blockData.block_seq;
   let blockInput = createInput(TX.blockSeq);
@@ -111,6 +101,14 @@ function setup() {
       redraw();
     }
   })
+  let randomBlocks = createButton("Randomize!");
+  randomBlocks.parent('#block-sequence');
+  randomBlocks.mousePressed(() => {
+    blockInput.value(blocks.randomSeq(draft.warps));
+    TX.blockSeq = blockInput.value();
+    treadleAsWarped();
+    redraw();
+  })
   
   treadleAsWarped();
   loadSettings();
@@ -121,25 +119,21 @@ function setup() {
   
   elts.blocks = select('#blocks-container');
   elts.draft = select('#draft-container')
-  // console.log(elts.draft);
-  
-  // elts.tieup = createDiv();
-  // elts.tieup.id("tie-up");
-  // elts.tieup.parent(elts.draft); 
-  // tieUp.setup(elts.tieup, { cell_size: defaults.dim_cell, xflip: true, yflip: false });
 
-  // elts.tx = createDiv();
-  // elts.tx.id("threading");
-  // elts.tx.parent(elts.draft);
-  // TX.setup(elts.tx, { cell_size: defaults.dim_cell, xflip: false, yflip: false });
-  
-  // print(blocks);
   // initialize grid renderers here
   for (let b of blocks.blocks) { loadBlock(b); }
   blocks.blocks.map((b) => b.render.updatePos());
+  let addBlock = createButton("+");
+  addBlock.parent(elts.blocks);
+  addBlock.class("add-button");
+  addBlock.attribute('disabled', true); // TODO: make this work
+  // TODO: add delete block buttons to cards
   
   draft.setup(defaults.dim_cell);
-  
+
+  let maxY = elts.dd.position().y + elts.dd.height;
+  resizeCanvas(windowWidth, maxY);
+
   noLoop();
   redraw();
 }
@@ -177,9 +171,12 @@ function draw() {
   TX.draw();
   tieUp.draw();
   TL.draw();
-  drawdown.draw();
 
   // DRAWDOWN
+  // TODO: let user choose between show thread colors and don't show (B+W draft)
+  drawdown.draw();
+
+  // this version draws 
   noStroke();
   let match = color_sequence.match;
   for (var i = 0; i < TL.picks; i++) {

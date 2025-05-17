@@ -42,6 +42,10 @@ class BlockSystem {
     let b = new Block(i, name, this, '');
     this.blocks.push(b);
   }
+
+  getBlock(c) {
+    return this.blocks.filter((el) => el.key == c)[0];
+  }
   
   compileBlocks(){
     // take the block sequence and the blocks and make a longer string to represent a threading or treadling sequence
@@ -54,6 +58,23 @@ class BlockSystem {
     }
     
     return res;
+  }
+
+  /**
+   * Generate a random sequence of blocks that are at least n threads long.
+   * @param {int} n 
+   */
+  randomSeq(n) {
+    let seq = "";
+    let len = 0;
+    while (len < n) {
+      let x = random(this.keys);
+      let b = this.getBlock(x);
+      seq += x;
+      len += b.data.length;
+    }
+    console.log(seq);
+    return seq;
   }
 }
 
@@ -102,9 +123,9 @@ class Block extends DraftContainer{
     // print(this.array);
   }
   
-  draw() {
-    // print(this);
-    this.render.draw(this.height, this.width, this.array);
-  }
+  // draw() {
+  //   // print(this);
+  //   this.render.draw(this.height, this.width, this.array);
+  // }
   
 }

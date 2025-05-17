@@ -46,7 +46,7 @@ p {
 }
 
 .num-input {
-  width: 2em;
+  width: 3em;
 }
 
 .symbol-input {
@@ -76,14 +76,19 @@ p {
 
 button {
   width: fit-content;
-  margin-bottom: 0.5em;
+  /* margin-bottom: 0.5em; */
+}
+
+.add-button {
+  height: 100%;
+  align-content: center;
 }
 
 .flex-row {
   display: flex;
   flex-direction: row;
   width: max-content;
-  align-items: baseline;
+  align-items: center;
 }
 
 .flex-row > div, .flex-row > h2 {
