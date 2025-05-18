@@ -49,8 +49,6 @@ const defaults = {
 
 let thread_colors = { warp: "", weft: "" };
 
-// block drafting
-
 // TODO: initialize more things outside of setup() because P5 is slow
 
 const { shafts, treadles, warps, picks } = {...defaults};
@@ -121,13 +119,22 @@ function setup() {
   elts.draft = select('#draft-container')
 
   // initialize grid renderers here
-  for (let b of blocks.blocks) { loadBlock(b); }
-  blocks.blocks.map((b) => b.render.updatePos());
-  let addBlock = createButton("+");
-  addBlock.parent(elts.blocks);
-  addBlock.class("add-button");
-  addBlock.attribute('disabled', true); // TODO: make this work
+  elts.addBlock = createButton("+");
+  elts.addBlock.parent(elts.blocks);
+  elts.addBlock.class("add-button");
+  blocks.setup(elts.blocks, elts.addBlock, defaults.dim_cell, 2);
+  
+  // addBlock.attribute('disabled', true); // TODO: make this work
   // TODO: add delete block buttons to cards
+  // for (let b of blocks.blocks) { loadBlock(b); }
+  
+  blocks.blocks.map((b) => b.render.updatePos());
+  
+  elts.addBlock.mouseClicked(() => {
+    let b = blocks.newBlock();
+    blocks.setupBlock(b);
+    redraw();
+  });
   
   draft.setup(defaults.dim_cell);
 

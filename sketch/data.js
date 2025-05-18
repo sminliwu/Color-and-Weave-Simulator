@@ -254,6 +254,7 @@ class DraftContainer {
 class GridRenderer {
   constructor(cell_size, elt, obj, xflip=false, yflip=true) {
     this.container = elt; // a P5 HTML element covering the area of canvas that the renderer is responsible for
+    this.offset = undefined; // P5 element position() returns values relative to how its parent is positioned, so store the parent element if needed to offset
     this.obj = obj; // the grid-based data object to render (DraftContainer or inheriting class)
     
     this.left = -1; // starting x pos on the canvas
@@ -296,7 +297,11 @@ class GridRenderer {
   // update position based on the container's position on the page
   updatePos() {
     // print(this);
-    this.position = this.container.position();
+    if (this.offset) {
+      let offset = this.offset.position();
+      let cont = this.container.position();
+      this.position = {x: offset.x+cont.x, y: offset.y+cont.y };
+    } else { this.position = this.container.position(); }
   }
 
   // forcibly place the container on the page

@@ -41,6 +41,20 @@ class BlockSystem {
     let name = "Block " + i;
     let b = new Block(i, name, this, '');
     this.blocks.push(b);
+    return b;
+  }
+
+  delBlock(key) {
+    this.blocks = this.blocks.filter((b) => b.key != key);
+  }
+
+  rekeyBlock(oldKey, newKey) {
+    const b = this.getBlock(oldKey);
+    if (this.keys.includes(newKey)) {
+      let otherB = this.getBlock(newKey);
+      otherB.key = oldKey;
+    }
+    b.key = newKey;
   }
 
   getBlock(c) {
@@ -75,6 +89,21 @@ class BlockSystem {
     }
     console.log(seq);
     return seq;
+  }
+
+  setup(container, addButton, cell_size, scale=1) {
+    this.elt = container;
+    this.add = addButton;
+    this.dim = cell_size;
+    this.scale = scale; // how much larger to display block drafts vs. the rest of the draft
+
+    this.blocks.map((b) => {
+      if (!b.render) { this.setupBlock(b) }
+    });
+  }
+
+  setupBlock(b) {
+    b.setup(this.add, { cell_size: this.dim*this.scale, xflip: false, yflip: true });
   }
 }
 
@@ -122,10 +151,58 @@ class Block extends DraftContainer{
     }
     // print(this.array);
   }
-  
-  // draw() {
-  //   // print(this);
-  //   this.render.draw(this.height, this.width, this.array);
-  // }
-  
+
+  /**
+   * For the Block b: initialize its GridRenderer, udpate P5 and DOM elements, set up events
+   * BEFORE CALLING: HTML elements loaded, default data loaded to a BlockSystem object
+   * @param {Block} b the Block object to load to DOM/P5
+   */
+  setup(button, drawParams) {
+    const b = this;
+    const grid = drawParams.cell_size;
+
+    let block = createDiv();
+    block.id('block-'+b.key+'-grid');
+    block.style('height', b.sys.shafts * grid + "px");
+    block.style('width', b.data.length * grid + "px");
+    block.mouseClicked(() => {
+      print("user clicked", mouseX, mouseY, "relative", block.position());
+    });
+
+    super.setup(block, drawParams);
+
+    // make the rest of the card contents
+    let h = createElement('p', b.name);
+    let blockInput = createInput(b.data);
+    blockInput.id('block-'+b.key+'-input');
+    
+    // make the card iteself
+    let card = createDiv();
+    this.elt = card;
+    this.render.offset = card;
+    card.id('block-'+b.key);
+    card.class('flex-column card');
+    
+    // place elements
+    // card.parent(container);
+    button.elt.before(card.elt);
+    h.parent(card);
+    block.parent(card);
+    blockInput.parent(card);
+    
+    blockInput.style('width', (b.data.length+1)*0.7+"em");
+    blockInput.input(() => {
+      // update block sequences
+      b.data = blockInput.value();
+      // print(TX.blockSeq);
+      // print(blocks);
+      TX.updateThreading();
+      treadleAsWarped();
+      
+      // block.style('width', b.data.length * grid + "px");
+      blockInput.style('width', b.data.length*0.7+"em");
+      blocks.blocks.map((b) => b.render.updatePos());
+      redraw();
+    });
+  }
 }

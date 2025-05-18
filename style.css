@@ -37,6 +37,10 @@ p {
   margin: 0px;
 }
 
+input {
+  font-family: monospace;
+}
+
 #sidebar {
   width: max-content;
   max-width: 30%;
@@ -54,8 +58,10 @@ p {
 }
 
 .card {
+  position: relative;
   padding: 5px;
   border: solid 0.5pt;
+  align-items: flex-start;
 }
 
 .card > input {
