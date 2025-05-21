@@ -1,8 +1,17 @@
 body, html {
+  font-family: sans-serif;
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: none;
+}
+
+h1, h2, h3 { 
+  font-family: monospace; 
+}
+
+h3 {
+  margin: 5px 0px 2px 0px;
 }
 
 canvas {
@@ -28,13 +37,12 @@ main {
 }
 
 body {
-  height: 100%;
   width: 100%;
   display: flex;
 }
 
 p {
-  margin: 0px;
+  margin: 5px 0px 5px 0px;
 }
 
 input {
@@ -54,17 +62,26 @@ input {
 }
 
 .symbol-input {
-  width: 1.5em;
+  width: 1em;
+}
+
+#blocks-container {
+  column-gap: 1em;
 }
 
 .card {
+  column-gap: 5px;
+}
+
+.card-body {
   position: relative;
   padding: 5px;
   border: solid 0.5pt;
   align-items: flex-start;
+  row-gap: 5px;
 }
 
-.card > input {
+.card-body > input {
   width: max-content;
 }
 
@@ -76,13 +93,12 @@ input {
 
 .page-flex-column {
   float: left;
-  padding: 0 1em;
+  margin: 0 1em;
   height: 100%;
 }
 
 button {
   width: fit-content;
-  /* margin-bottom: 0.5em; */
 }
 
 .add-button {
@@ -94,12 +110,7 @@ button {
   display: flex;
   flex-direction: row;
   width: max-content;
-  align-items: center;
-}
-
-.flex-row > div, .flex-row > h2 {
-  margin: 0em;
-  margin-right: 1em;
+  align-items: top;
 }
 
 .setting {

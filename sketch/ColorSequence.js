@@ -30,11 +30,11 @@ class ColorSequence {
     this.colors[i].color = newColor;
   }
   
-  setSymbol(key, newKey) {
-    console.log("key ", key, "newKey ", newKey);
-    let i = this.getIndexOfColor(key);
+  rekeyColor(oldKey, newKey) {
+    console.log("key ", oldKey, "newKey ", newKey);
+    let i = this.getIndexOfColor(oldKey);
     this.colors[i].key = newKey;
-    this.seq = this.seq.replaceAll(key, newKey);
+    this.seq = this.seq.replaceAll(oldKey, newKey);
     return newKey;
   }
   
@@ -137,8 +137,8 @@ function addContrastingColors() {
   color_sequence.colors.push(colorB);
   
   // print(lightness(rgbA), lightness(rgbB));
-  loadColor(colorA);
-  loadColor(colorB);
+  setupColor(colorA);
+  setupColor(colorB);
   // loadColor({key: "x", color: rgbA});
   // loadColor({key: "y", color: rgbB});
 }

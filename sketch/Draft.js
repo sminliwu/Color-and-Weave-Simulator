@@ -69,25 +69,41 @@ class Draft {
 
   twillTieUp(shafts, shade) {
     if (shade > 0 && shade < shafts) {
+      this.shafts = shafts;
+      this.treadles = shafts + 2;
+
       let result = [];
-      let tabby = false;
-      for (var i=0; i<shafts; i++) {    
-        let row = []; 
-        for (var j=0; j<shafts; j++) {
-          if ((shafts-i <= shade) && j < (i + shade) % shafts) { row.unshift(true); }
-          else if (j < i) { row.unshift(false); }
-          else if (j == i) { row.unshift(true); }
-          else if (j < i + shade || j < (i + shade)%shafts) { row.unshift(true); }
-          else { row.unshift(false); }
+      let twillRow = [];
+      for (let s=0; s < shafts; s++) {
+        if (s<shade) { twillRow.push(true); }
+        else { twillRow.push(false)};
+      }
+      let tabby = true;
+
+      function rotate(array, n=1, dir=true) {
+        let res = Array.from(array);
+        if (dir) {
+          for (let i=0; i<n; i++) {
+            let x = res.pop();
+            res.unshift(x);
+          }
+        } else {
+          for (let i=0; i<n; i++) {
+            let x = res.shift();
+            res.push(x);
+          }
         }
-        row = row.concat([tabby, !tabby]);
+        return res;
+      }
+
+      for (let i=0; i<shafts; i++) {    
+        let row = twillRow.concat([tabby, !tabby]);
         tabby = !tabby;
+        twillRow = rotate(twillRow);
         result.push(row);
       }
       
       this.tieupFromArray(result);
-      this.shafts = shafts;
-      this.treadles = shafts + 2;
     }
   }
 }

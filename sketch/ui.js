@@ -4,14 +4,14 @@ function setWarps(n) {
   TX.warps = n;
   // console.log(TX);
   drawdown.width = n;
-  updateDraft();
+  // updateDraft();
   redraw();
 }
 
 function setWefts(n) {
   TL.picks = n;
   drawdown.height = n;
-  updateDraft(false);
+  // updateDraft(false);
   redraw();
 }
 
@@ -50,6 +50,7 @@ function loadSettings() {
   // warps.elt = $('#test');
   // console.log(warps.elt);
   warps.parent("num-warps");
+  warps.attribute('type', 'number');
   warps.class("num-input");
   warps.input(() => {
     let num = parseInt(warps.value());
@@ -113,7 +114,7 @@ function updateDraft(tr=true) {
   redraw();
 }
 
-function loadColor(c) {
+function setupColor(c) {
   let str = "<tr id='c-"+c.key+"'>";
   str += "<td id='c-"+c.key+"-symb'></td>";
   str += "<td id='c-"+c.key+"-pick'></td></tr>";
@@ -124,7 +125,7 @@ function loadColor(c) {
   inp.id(c.key+"symbol");
   inp.size(14);
   inp.input(() => {
-    if (inp.value().length > 0) {
+    if (inp.value().length == 1) {
       console.log(inp.value());
       let newKey = color_sequence.setSymbol(inp.id()[0], inp.value()[0]);
       // console.log(color_sequence);

@@ -12,6 +12,9 @@ class BlockSystem {
 
     this.blocks = []; // all individual Block objects
     this.seq = ''; // store a sequence of blocks as string of their key characters
+    this.counter = 0; // count the num of blocks created since initialization to generate num IDs
+
+    this.elts = undefined; // after setup, points to all associated elements
   }
   
   static fromObject(preset) {
@@ -21,8 +24,10 @@ class BlockSystem {
     for (let b of preset.blocks) {
       // console.log(b)
       sys.loadBlockData(b);
+      sys.counter++;
     }
     sys.seq = preset.block_seq;
+    console.log(sys.keys.map((k) => parseInt(k)));
     return sys;
   }
   
@@ -30,16 +35,15 @@ class BlockSystem {
   get keys() { return this.blocks.map(b => b.key); }
   
   loadBlockData(params) {
-    let b = new Block(this.length+1, params.name, this);
-    b.data = params.data;
+    let b = new Block(params.key, this, params.data);
+    // b.data = params.data;
     // b.stringToArrayData();
     this.blocks.push(b);
   }
   
   newBlock() {
-    let i = this.length+1;
-    let name = "Block " + i;
-    let b = new Block(i, name, this, '');
+    let i = this.counter+1;
+    let b = new Block(i, this, '');
     this.blocks.push(b);
     return b;
   }
@@ -53,8 +57,14 @@ class BlockSystem {
     if (this.keys.includes(newKey)) {
       let otherB = this.getBlock(newKey);
       otherB.key = oldKey;
+      this.seq = this.seq.replaceAll(newKey, '-'); // placeholder key during the swap
+      this.seq = this.seq.replaceAll(oldKey, newKey);
+      this.seq = this.seq.replaceAll('-', oldKey);
+    } else {
+      this.seq = this.seq.replaceAll(oldKey, newKey);
     }
     b.key = newKey;
+    this.updateDOM();
   }
 
   getBlock(c) {
@@ -67,10 +77,9 @@ class BlockSystem {
     let res = '';
     print("compiling blocks...", this.blocks, this.seq);
     for (let c of this.seq) {
-      let b = this.blocks[parseInt(c)-1];
+      let b = this.getBlock(c);
       res += b.data;
     }
-    
     return res;
   }
 
@@ -91,9 +100,13 @@ class BlockSystem {
     return seq;
   }
 
-  setup(container, addButton, cell_size, scale=1) {
-    this.elt = container;
-    this.add = addButton;
+  setup(seqInput, addButton, cell_size, scale=1) {
+    this.elts = {
+      seqInput: seqInput,
+      addButton: addButton,
+    }
+    // this.elt = seqInput;
+    // this.add = addButton;
     this.dim = cell_size;
     this.scale = scale; // how much larger to display block drafts vs. the rest of the draft
 
@@ -103,20 +116,32 @@ class BlockSystem {
   }
 
   setupBlock(b) {
-    b.setup(this.add, { cell_size: this.dim*this.scale, xflip: false, yflip: true });
+    const add = this.elts.addButton;
+    b.setup(add, { cell_size: this.dim*this.scale, xflip: false, yflip: true });
+  }
+
+  updateDOM() {
+    this.elts.seqInput.value(this.seq);
+    this.blocks.map((b) => {
+      b.updateDOM();
+    })
   }
 }
 
 class Block extends DraftContainer{
   // a small DraftContainer subtype that contains a threading or treadling sequence that can be repeated as a unit
-  constructor(key, name, sys) {
+  constructor(key, sys, data='') {
     super(sys.shafts, 0);
-    this.key = key;  
-    this.name = name;
+    this.key = key.toString();  
+    // this.name = name;
     this.sys = sys; // reference back to the block system
-    this._data = ''; // string of numbers that correspond to shafts or treadles depending on block direction
+    this.data = data; // string of numbers that correspond to shafts or treadles depending on block direction
+
+    this.elts = undefined;
+    // if (data.length > 0) { this.stringArra}
   }
   
+  get name() { return "Block "+this.key; }
   get dir() { return this.sys.dir; }
   get data() { return this._data; }
   set data(str) { 
@@ -159,38 +184,88 @@ class Block extends DraftContainer{
    */
   setup(button, drawParams) {
     const b = this;
-    const grid = drawParams.cell_size;
+    this.elts = {
+      card: createDiv(),
+      header: createDiv(),
+      key: createInput(b.key.toString()),
+      del: createButton('-'),
+      body: createDiv(),
+      h: createElement('h3', b.name),
+      grid: createDiv(),
+      blockInput: createInput(b.data),
+    }
+    const { card, header, key, del, body, h, grid, blockInput } = {...this.elts};
 
-    let block = createDiv();
-    block.id('block-'+b.key+'-grid');
-    block.style('height', b.sys.shafts * grid + "px");
-    block.style('width', b.data.length * grid + "px");
-    block.mouseClicked(() => {
-      print("user clicked", mouseX, mouseY, "relative", block.position());
+    // make the card to contain everything
+    // let card = createDiv();
+    card.id('block-'+b.key);
+    card.class('flex-row card');
+
+    // make the key mapping and delete button separate from the card
+    // let header = createDiv();
+    this.elts.header = header;
+    header.id('block-'+b.key+'-header');
+    header.class('flex-column');
+
+    // let key = createInput(b.key.toString());
+    // key.parent("block-"+b.key);
+    key.id('block-'+b.key+'-key');
+    key.class('symbol-input');
+    key.attribute('title', 'You can use a single alphanumeric character (0-9, a-z, A-Z) to name each block.')
+    key.input(() => {
+      if (key.value().length == 1) {
+        b.sys.rekeyBlock(b.key, key.value());
+        // update block sequence input
+        redraw();
+      }
     });
 
-    super.setup(block, drawParams);
+    // let del = createButton('-');
+    del.style('width', key.width);
+    del.attribute('title', 'Click to delete this block.')
+    del.mouseClicked(() => {
+      header.remove();
+      card.remove();
+      b.sys.delBlock(b.key);
+      redraw();
+    })
+
+    key.parent(header);
+    del.parent(header);
+
+    // let body = createDiv();
+    body.id('block-'+b.key+'-body');
+    body.class('flex-column card-body');
 
     // make the rest of the card contents
-    let h = createElement('p', b.name);
-    let blockInput = createInput(b.data);
+    // let h = createElement('h3', b.name);
+    // let blockInput = createInput(b.data);
     blockInput.id('block-'+b.key+'-input');
+
+    // let grid = createDiv();
+    grid.id('block-'+b.key+'-grid');
+    grid.style('height', b.sys.shafts * grid + "px");
+    grid.style('width', b.data.length * grid + "px");
+    grid.mouseClicked(() => {
+      print("user clicked", mouseX, mouseY, "relative", grid.position());
+    });
+
+    super.setup(grid, drawParams);
+    this.render.offset = body;
     
-    // make the card iteself
-    let card = createDiv();
-    this.elt = card;
-    this.render.offset = card;
-    card.id('block-'+b.key);
-    card.class('flex-column card');
+    header.parent(card);    
+    body.parent(card);
+
+    h.parent(body);
+    grid.parent(body);
+    blockInput.parent(body);
     
     // place elements
     // card.parent(container);
     button.elt.before(card.elt);
-    h.parent(card);
-    block.parent(card);
-    blockInput.parent(card);
     
-    blockInput.style('width', (b.data.length+1)*0.7+"em");
+    let w = (b.data.length == 0) ? 1 : b.data.length;
+    blockInput.style('width', w*0.7+"em");
     blockInput.input(() => {
       // update block sequences
       b.data = blockInput.value();
@@ -204,5 +279,12 @@ class Block extends DraftContainer{
       blocks.blocks.map((b) => b.render.updatePos());
       redraw();
     });
+  }
+
+  updateDOM() {
+    const { key, blockInput, h } = {...this.elts};
+    key.value(this.key);
+    blockInput.value(this.data);
+    h.html(this.name);
   }
 }

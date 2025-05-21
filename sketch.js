@@ -11,12 +11,6 @@ const defaults = {
   treadles: 6,
   warps: 90,
   picks: 90,
-  tieUp: [
-    [false, true, true, false, false, true],
-    [true, true, false, false, true, false],
-    [true, false, false, true, false, true],
-    [false, false, true, true, true, false],
-  ],
   // drawing parameters
   xflip: false,
   yflip: false,
@@ -29,28 +23,24 @@ const defaults = {
     blocks: [
       {
         key: "1",
-        name: "Block 1",
-        data: "1234321",
+        data: "123432",
       },
       {
         key: "2",
-        name: "Block 2",
-        data: "2341432",
+        data: "12341432",
       },
       {
         key: "3",
-        name: "Block 3",
         data: "12121212",
       },
     ],
-    block_seq: "121233123",
   },
 };
 
 let thread_colors = { warp: "", weft: "" };
 
 // TODO: initialize more things outside of setup() because P5 is slow
-
+// initialize all components of the draft
 const { shafts, treadles, warps, picks } = {...defaults};
 const draft = new Draft(shafts, treadles, warps, picks);
 const blocks = BlockSystem.fromObject(defaults.blockData);
@@ -63,23 +53,14 @@ const { TX, TL, tieUp, drawdown } = {
   tieUp: draft.tieup, 
   drawdown: draft.drawdown
 };
-console.log(draft.tieup, tieUp);
+// console.log(draft.tieup, tieUp);
 
 console.log("draft initialized");
 
 const elts = {}; // maintain collection of HTML elements created
 
-// document.addEventListener("DOMContentLoaded", (event) => {
-//   console.log("DOM fully loaded and parsed");
-// });
-// window.addEventListener("load", (event) => {
-//   console.log("page is fully loaded");
-// });
-
 function setup() {
   console.log("running p5 setup function");
-  // initialize all components of the draft
-  // print(blocks.compileBlocks());
 
   color_sequence = new ColorSequence();
   color_list = $("#colors-list");
@@ -89,7 +70,7 @@ function setup() {
   color_sequence.seq = "01";
 
   TX.blocks = blocks;
-  TX.blockSeq = defaults.blockData.block_seq;
+  TX.blockSeq = blocks.randomSeq(draft.warps);
   let blockInput = createInput(TX.blockSeq);
   blockInput.parent('#block-sequence');
   blockInput.input(() => {
@@ -100,6 +81,7 @@ function setup() {
     }
   })
   let randomBlocks = createButton("Randomize!");
+  randomBlocks.attribute('title', 'Click to generate a random sequence of blocks that fills the draft.')
   randomBlocks.parent('#block-sequence');
   randomBlocks.mousePressed(() => {
     blockInput.value(blocks.randomSeq(draft.warps));
@@ -122,7 +104,8 @@ function setup() {
   elts.addBlock = createButton("+");
   elts.addBlock.parent(elts.blocks);
   elts.addBlock.class("add-button");
-  blocks.setup(elts.blocks, elts.addBlock, defaults.dim_cell, 2);
+  elts.addBlock.attribute('title', "Click to add a new block.")
+  blocks.setup(blockInput, elts.addBlock, defaults.dim_cell, 2);
   
   // addBlock.attribute('disabled', true); // TODO: make this work
   // TODO: add delete block buttons to cards
@@ -181,9 +164,9 @@ function draw() {
 
   // DRAWDOWN
   // TODO: let user choose between show thread colors and don't show (B+W draft)
-  drawdown.draw();
+  // drawdown.draw();
 
-  // this version draws 
+  // this version draws the thread colors
   noStroke();
   let match = color_sequence.match;
   for (var i = 0; i < TL.picks; i++) {
